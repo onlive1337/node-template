@@ -1,1 +1,3 @@
-console.log("Hello World");
+const getCurrentDate = require('/date');
+
+console.log(getCurrentDate());
