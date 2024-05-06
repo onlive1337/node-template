@@ -42,5 +42,9 @@
     "hooks": {
       "pre-commit": "lint-staged"
     }
+  },
+  "dependencies": {
+    "axios": "^0.16.2",
+    "node-fetch": "^2.7.0"
   }
 }

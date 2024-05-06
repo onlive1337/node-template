@@ -1,3 +1,3 @@
-const getCurrentDate = require('/date');
+const fetchAndLogPostsFetch = require("./fetch");
 
-console.log(getCurrentDate());
+fetchAndLogPostsFetch();
