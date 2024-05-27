@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager</title>
+</head>
+<body>
+    <h1>Task Manager</h1>
+
+    <h2>Add New Task</h2>
+    <form id="addTaskForm">
+        <label for="title">Title:</label>
+        <input type="text" id="title" name="title" required><br>
+        <label for="description">Description:</label>
+        <input type="text" id="description" name="description" required><br>
+        <button type="submit">Add Task</button>
+    </form>
+
+    <h2>All Tasks</h2>
+    <ul id="taskList"></ul>
+
+    <script>
+        async function addTask() {
+            const form = document.getElementById('addTaskForm');
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch('/api/tasks', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(Object.fromEntries(formData))
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    console.log('New task added:', data.task);
+                    displayTasks();
+                } else {
+                    console.error('Error adding new task', data);
+                }
+            } catch (err) {
+                console.error('Error adding new task', err);
+            }
+        }
+
+        async function deleteTask(taskId) {
+            try {
+                const response = await fetch(`/api/tasks/${taskId}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    console.log('Task deleted:', data);
+                    displayTasks();
+                } else {
+                    console.error('Error deleting task', data);
+                }
+            } catch (err) {
+                console.error('Error deleting task', err);
+            }
+        }
+
+        async function updateTask(taskId, updatedTask) {
+            try {
+                const response = await fetch(`/api/tasks/${taskId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updatedTask)
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    console.log('Task updated:', data);
+                    displayTasks();
+                } else {
+                    console.error('Error updating task', data);
+                }
+            } catch (err) {
+                console.error('Error updating task', err);
+            }
+        }
+
+        async function displayTasks() {
+            const taskList = document.getElementById('taskList');
+            taskList.innerHTML = '';
+
+            try {
+                const response = await fetch('/api/tasks');
+                const data = await response.json();
+                if (response.ok) {
+                    data.tasks.forEach(task => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `
+                            <span>Title: <input type="text" value="${task.title}" id="title-${task._id}"></span>
+                            <span>Description: <input type="text" value="${task.description}" id="description-${task._id}"></span>
+                            <button onclick="updateTask('${task._id}', { title: document.getElementById('title-${task._id}').value, description: document.getElementById('description-${task._id}').value })">Update</button>
+                            <button onclick="deleteTask('${task._id}')">Delete</button>
+                        `;
+                        taskList.appendChild(li);
+                    });
+                } else {
+                    console.error('Error fetching tasks', data);
+                }
+            } catch (err) {
+                console.error('Error fetching tasks', err);
+            }
+        }
+
+        document.getElementById('addTaskForm').addEventListener('submit', event => {
+            event.preventDefault();
+            addTask();
+        });
+
+        displayTasks();
+    </script>
+</body>
+</html>
